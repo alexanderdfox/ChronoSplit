@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronosSplit // Ultimate Centenary Life Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Include Marked.js for robust Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #05070c;
+            --panel-bg: rgba(13, 18, 30, 0.88);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --primary-neon: #6366f1;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 1.5rem 1rem;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-green), var(--primary-neon), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* CARD CONTAINERS */
+        .card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        h2 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* DECADE SLIDER */
+        .timeline-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .timeline-controls label {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary-neon);
+            cursor: pointer;
+        }
+
+        /* CANVAS MATRIX */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 0.5rem;
+            border: 1px solid var(--panel-border);
+        }
+
+        canvas { display: block; cursor: pointer; }
+
+        /* MAIN LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 950px) {
+            .main-layout { grid-template-columns: 1fr; }
+        }
+
+        /* INPUT AREA & MARKDOWN */
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 0.85rem;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+
+        textarea:focus { border-color: var(--accent-cyan); }
+
+        .toolbar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        input[type="date"], input[type="number"] {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--panel-border);
+            color: var(--accent-cyan);
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-neon), var(--accent-cyan));
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--panel-border); color: var(--text-main); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+        /* IMAGE THUMBNAILS */
+        .image-upload-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .image-preview-container {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .thumb-box {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--panel-border);
+        }
+
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-delete {
+            position: absolute; top: 2px; right: 2px;
+            background: rgba(0,0,0,0.7); color: #fff;
+            border: none; border-radius: 50%; width: 16px; height: 16px;
+            font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* TIMELINE & MARKDOWN OUTPUT */
+        .output-view {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .markdown-content {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--panel-border);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: var(--accent-cyan); margin-bottom: 0.5rem; }
+        .markdown-content ul, .markdown-content ol { padding-left: 1.2rem; margin: 0.5rem 0; }
+        .markdown-content blockquote { border-left: 3px solid var(--primary-neon); padding-left: 0.5rem; color: var(--text-muted); margin: 0.5rem 0; }
+
+        .attached-photos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .attached-photos img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .attached-photos img:hover { transform: scale(1.03); }
+
+        /* STATS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.85rem;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--panel-border);
+            padding: 0.6rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--accent-cyan); font-family: 'Fira Code'; }
+        .stat-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <header>
+        <div class="logo">⚡ CHRONOSSPLIT <span style="font-size:0.75rem; color:var(--text-muted)">// ULTIMATE CENTENARY</span></div>
+        <div class="header-controls">
+            <span style="font-family:'Fira Code'; font-size:0.8rem; color:var(--accent-amber)">🎂 Birth: <input type="number" id="birthYearInput" value="2000" style="width:65px;" onchange="updateBirthYear()"></span>
+            <button class="btn btn-outline" onclick="exportBackup()">📥 Export Backup</button>
+            <label class="btn btn-outline" style="cursor: pointer; margin:0;">
+                📤 Restore JSON <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+            </label>
+        </div>
+    </header>
+
+    <!-- 120-YEAR LIFETIME MATRIX -->
+    <div class="card">
+        <h2>
+            120-Year Centenary Matrix (43,830 Days)
+            <span id="canvas-hover-info" style="font-family:'Fira Code'; font-size:0.8rem; color:var(--accent-cyan); text-transform:none;">Hover over matrix...</span>
+        </h2>
+        
+        <div class="timeline-controls">
+            <label for="decadeSlider">Jump to Age/Decade: <span id="decadeLabel">Age 0 - 120</span></label>
+            <input type="range" id="decadeSlider" min="0" max="120" value="0" step="10" oninput="handleSliderChange(this.value)">
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="lifeCanvas" width="1240" height="240"></canvas>
+        </div>
+    </div>
+
+    <!-- MAIN INTERACTION AREA -->
+    <div class="main-layout">
+        
+        <!-- INPUT & ENTRY (MARKDOWN & IMAGES) -->
+        <div class="card">
+            <h2>Markdown Retro Journal</h2>
+            <div class="toolbar-row" style="margin-top:0; margin-bottom:0.75rem;">
+                <label style="font-size: 0.8rem; color:var(--text-muted)">Date: <input type="date" id="logDate"></label>
+                <span style="font-size: 0.75rem; color: var(--accent-green);">Supports **Markdown**, Lists, Code & Photos</span>
+            </div>
+
+            <textarea id="rawInput" placeholder="# Morning Review
+- 8:00 AM: Coffee & email triage
+- 9:30 AM: Focused architectural design
+
+> 'Reflecting on the day brings clarity.'
+
+## Evening Walk
+Walked 5,000 steps at dusk."></textarea>
+
+            <div class="image-upload-row">
+                <label class="btn btn-outline" style="font-size: 0.75rem; padding: 0.4rem 0.8rem; cursor:pointer; margin:0;">
+                    📷 Attach Photos <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event)">
+                </label>
+                <span id="img-count-label" style="font-size: 0.75rem; color: var(--text-muted);">0 photos attached</span>
+            </div>
+
+            <div class="image-preview-container" id="previewContainer"></div>
+
+            <button class="btn" style="margin-top:1rem; width:100%; justify-content:center" onclick="processAndSave()">
+                Save Entry & Update Life Matrix
+            </button>
+        </div>
+
+        <!-- TIMELINE & RENDERED OUTPUT -->
+        <div class="card">
+            <h2>Rendered Journal <span id="selected-date-label" style="color:var(--accent-cyan); font-size: 0.8rem;"></span></h2>
+            
+            <div class="output-view" id="outputDisplay">
+                <div style="color: var(--text-muted); font-size: 0.85rem; text-align:center; padding: 3rem 0;">
+                    Select a date on the canvas or type an entry to view rendered Markdown and pictures.
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-val" id="stat-photos">0</div>
+                    <div class="stat-lbl">Photos Saved</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val" id="stat-days-logged" style="color:var(--accent-amber)">0</div>
+                    <div class="stat-lbl">Days Logged Total</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val" id="stat-life-pct" style="color:var(--accent-green)">0%</div>
+                    <div class="stat-lbl">Life Elapsed</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    const DB_KEY = 'CHRONOS_ULTIMATE_DATA';
+    let db = JSON.parse(localStorage.getItem(DB_KEY)) || { birthYear: 2000, logs: {} };
+    let currentSessionImages = []; // Temporary array for active day's uploaded base64 images
+
+    // Canvas Constants
+    const CANVAS = document.getElementById('lifeCanvas');
+    const CTX = CANVAS.getContext('2d');
+    const YEARS = 120;
+    const DAYS_PER_YEAR = 365;
+    const CELL_SIZE = 3;
+    const GAP = 1;
+
+    // DOM Elements
+    const logDateInput = document.getElementById('logDate');
+    const rawInputEl = document.getElementById('rawInput');
+    const outputDisplayEl = document.getElementById('outputDisplay');
+    const birthYearInput = document.getElementById('birthYearInput');
+    const canvasHoverInfo = document.getElementById('canvas-hover-info');
+    const previewContainer = document.getElementById('previewContainer');
+    const imgCountLabel = document.getElementById('img-count-label');
+
+    // Initialization
+    birthYearInput.value = db.birthYear || 2000;
+    const todayStr = new Date().toISOString().split('T')[0];
+    logDateInput.value = todayStr;
+
+    window.onload = () => {
+        renderMatrix();
+        loadDay(todayStr);
+        updateLifetimeStats();
+    };
+
+    function updateBirthYear() {
+        db.birthYear = parseInt(birthYearInput.value) || 2000;
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        renderMatrix();
+        updateLifetimeStats();
+    }
+
+    // 1. CANVAS MATRIX RENDERER
+    function renderMatrix() {
+        CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+        const birthYear = db.birthYear;
+        const currentYear = new Date().getFullYear();
+        const currentAge = currentYear - birthYear;
+
+        for (let y = 0; y < YEARS; y++) {
+            const yearNum = birthYear + y;
+            const x = y * (CELL_SIZE + GAP) + 20;
+
+            for (let d = 0; d < DAYS_PER_YEAR; d += 7) {
+                const dayIndex = Math.floor(d / 7);
+                const canvasY = dayIndex * (CELL_SIZE + GAP) + 20;
+
+                const cellDate = new Date(yearNum, 0, d + 1).toISOString().split('T')[0];
+                const hasData = db.logs && db.logs[cellDate] && (db.logs[cellDate].raw || (db.logs[cellDate].images && db.logs[cellDate].images.length > 0));
+
+                if (hasData) {
+                    CTX.fillStyle = '#10b981'; // Logged day
+                } else if (y < currentAge) {
+                    CTX.fillStyle = 'rgba(99, 102, 241, 0.25)'; // Past days
+                } else if (y === currentAge) {
+                    CTX.fillStyle = 'rgba(245, 158, 11, 0.6)'; // Current year
+                } else {
+                    CTX.fillStyle = 'rgba(255, 255, 255, 0.04)'; // Future
+                }
+
+                CTX.fillRect(x, canvasY, CELL_SIZE, CELL_SIZE);
+            }
+        }
+
+        CTX.fillStyle = '#9ca3af';
+        CTX.font = '9px Fira Code';
+        for (let y = 0; y <= YEARS; y += 10) {
+            const x = y * (CELL_SIZE + GAP) + 20;
+            CTX.fillText(`A${y}`, x, 12);
+        }
+    }
+
+    // 2. CANVAS HOVER & CLICK
+    CANVAS.addEventListener('mousemove', (e) => {
+        const rect = CANVAS.getBoundingClientRect();
+        const x = e.clientX - rect.left - 20;
+        const y = e.clientY - rect.top - 20;
+        if (x < 0 || y < 0) return;
+
+        const age = Math.floor(x / (CELL_SIZE + GAP));
+        const week = Math.floor(y / (CELL_SIZE + GAP));
+
+        if (age >= 0 && age < YEARS && week >= 0 && week < 52) {
+            const targetYear = db.birthYear + age;
+            const estimatedDay = week * 7 + 1;
+            const hoveredDate = new Date(targetYear, 0, estimatedDay).toISOString().split('T')[0];
+            const hasData = db.logs && db.logs[hoveredDate];
+            canvasHoverInfo.innerText = `Age ${age} (${targetYear}) ~ Day ${estimatedDay} [${hasData ? 'LOGGED' : 'EMPTY'}]`;
+        }
+    });
+
+    CANVAS.addEventListener('click', (e) => {
+        const rect = CANVAS.getBoundingClientRect();
+        const x = e.clientX - rect.left - 20;
+        const y = e.clientY - rect.top - 20;
+        if (x < 0 || y < 0) return;
+
+        const age = Math.floor(x / (CELL_SIZE + GAP));
+        const week = Math.floor(y / (CELL_SIZE + GAP));
+
+        if (age >= 0 && age < YEARS && week >= 0 && week < 52) {
+            const targetYear = db.birthYear + age;
+            const estimatedDay = week * 7 + 1;
+            const selectedDate = new Date(targetYear, 0, estimatedDay).toISOString().split('T')[0];
+            logDateInput.value = selectedDate;
+            loadDay(selectedDate);
+        }
+    });
+
+    function handleSliderChange(val) {
+        document.getElementById('decadeLabel').innerText = `Age ${val}`;
+        document.querySelector('.canvas-wrapper').scrollLeft = (val / 120) * CANVAS.width;
+    }
+
+    // 3. IMAGE UPLOAD & BASE64 CONVERSION
+    function handleImageUpload(event) {
+        const files = event.target.files;
+        if (!files) return;
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentSessionImages.push(e.target.result);
+                renderImagePreviews();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderImagePreviews() {
+        previewContainer.innerHTML = '';
+        currentSessionImages.forEach((imgSrc, index) => {
+            const box = document.createElement('div');
+            box.className = 'thumb-box';
+            box.innerHTML = `
+                <img src="${imgSrc}" alt="thumb">
+                <button class="thumb-delete" onclick="removeImage(${index})">×</button>
+            `;
+            previewContainer.appendChild(box);
+        });
+        imgCountLabel.innerText = `${currentSessionImages.length} photos attached`;
+    }
+
+    function removeImage(index) {
+        currentSessionImages.splice(index, 1);
+        renderImagePreviews();
+    }
+
+    // 4. SAVE & LOAD DATA
+    function processAndSave() {
+        const dateStr = logDateInput.value;
+        const rawText = rawInputEl.value;
+
+        if (!dateStr) return alert('Select a date!');
+
+        if (!db.logs) db.logs = {};
+        db.logs[dateStr] = {
+            raw: rawText,
+            images: [...currentSessionImages],
+            updatedAt: new Date().toISOString()
+        };
+
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        renderMatrix();
+        loadDay(dateStr);
+        updateLifetimeStats();
+        alert('Log and photos successfully saved to local vault!');
+    }
+
+    function loadDay(dateStr) {
+        document.getElementById('selected-date-label').innerText = `(${dateStr})`;
+        const entry = db.logs ? db.logs[dateStr] : null;
+        
+        if (entry) {
+            rawInputEl.value = entry.raw || '';
+            currentSessionImages = entry.images ? [...entry.images] : [];
+            renderImagePreviews();
+            renderOutput(entry.raw, currentSessionImages);
+        } else {
+            rawInputEl.value = '';
+            currentSessionImages = [];
+            renderImagePreviews();
+            renderOutput('', []);
+        }
+    }
+
+    function renderOutput(rawMarkdown, images) {
+        outputDisplayEl.innerHTML = '';
+
+        if (!rawMarkdown && (!images || images.length === 0)) {
+            outputDisplayEl.innerHTML = `
+                <div style="color: var(--text-muted); font-size: 0.85rem; text-align:center; padding: 3rem 0;">
+                    No log entries or photos for this date.
+                </div>`;
+            return;
+        }
+
+        const mdContainer = document.createElement('div');
+        mdContainer.className = 'markdown-content';
+        mdContainer.innerHTML = marked.parse(rawMarkdown || '*No text content provided.*');
+        outputDisplayEl.appendChild(mdContainer);
+
+        if (images && images.length > 0) {
+            const photoGrid = document.createElement('div');
+            photoGrid.className = 'attached-photos';
+            images.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.onclick = () => window.open(src); // Open full view on click
+                photoGrid.appendChild(img);
+            });
+            outputDisplayEl.appendChild(photoGrid);
+        }
+    }
+
+    // 5. BACKUP & UPLOAD (JSON EXPORT/IMPORT)
+    function exportBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `chronossplit_centenary_backup_${new Date().toISOString().split('T')[0]}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+    }
+
+    function importBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (imported && imported.logs) {
+                    db = imported;
+                    localStorage.setItem(DB_KEY, JSON.stringify(db));
+                    birthYearInput.value = db.birthYear || 2000;
+                    renderMatrix();
+                    loadDay(logDateInput.value);
+                    updateLifetimeStats();
+                    alert('Backup successfully imported and restored!');
+                } else {
+                    alert('Invalid backup file structure.');
+                }
+            } catch (err) {
+                alert('Failed to parse JSON backup file.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function updateLifetimeStats() {
+        const totalLogs = db.logs ? Object.keys(db.logs).filter(k => db.logs[k].raw || (db.logs[k].images && db.logs[k].images.length > 0)).length : 0;
+        
+        let totalPhotos = 0;
+        if (db.logs) {
+            Object.values(db.logs).forEach(l => {
+                if (l.images) totalPhotos += l.images.length;
+            });
+        }
+
+        document.getElementById('stat-photos').innerText = totalPhotos;
+        document.getElementById('stat-days-logged').innerText = totalLogs;
+
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - db.birthYear;
+        const lifePct = Math.min(100, Math.max(0, (age / 120) * 100)).toFixed(1);
+        document.getElementById('stat-life-pct').innerText = `${lifePct}%`;
+    }
+
+    logDateInput.addEventListener('change', (e) => loadDay(e.target.value));
+</script>
+
+</body>
+</html>
